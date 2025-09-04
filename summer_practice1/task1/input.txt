@@ -1,0 +1,13 @@
+Sasha Ohio 6
+Artem Nevada 16
+Petya Texas 34
+Dmitry California 12
+Ivan Florida 8
+Mikhail Arizona 45
+Sergey Colorado 19
+Alex NewYork 27
+Nikolay Washington 5
+Oleg Georgia 23
+Vladimir Michigan 14
+Andrey Illinois 31
+Max Oregon 9
