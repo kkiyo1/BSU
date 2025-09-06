@@ -1,13 +1,13 @@
 #include "employee.h"
+#include <iostream>
 #include <Windows.h>
 #include <string>
-#include <iostream>
 #include <iomanip>
 #include <sstream>
 
 int main(int argc, char* argv[]) {
     if (argc != 4) {
-        std::cerr << "Usage: Reporter <input_file> <output_file> <hourly_rate>" << std::endl;
+        std::cerr << "Program usage: Reporter <input_file> <output_file> <hourly_rate>\n";
         return 1;
     }
 
@@ -25,7 +25,7 @@ int main(int argc, char* argv[]) {
         NULL
     );
 
-    if (hInputFile == INVALID_HANDLE_VALUE) {
+    if (INVALID_HANDLE_VALUE == hInputFile) {
         std::cerr << "Cannot open file " << inputFilename << '\n';
         return 1;
     }
@@ -40,17 +40,17 @@ int main(int argc, char* argv[]) {
         NULL
     );
 
-    if (hOutputFile == INVALID_HANDLE_VALUE) {
+    if (INVALID_HANDLE_VALUE == hOutputFile) {
         std::cerr << "Cannot create file " << outputFilename << '\n';
         CloseHandle(hInputFile);
         return 1;
     }
 
     std::stringstream report;
-    report << "Report for file: " << inputFilename << "\n";
+    report << "Report for file: " << inputFilename << '\n';
     report << "==========================================\n";
     report << std::setw(8) << "Number" << std::setw(12) << "Name"
-        << std::setw(10) << "Hours" << std::setw(12) << "Salary" << "\n";
+        << std::setw(10) << "Hours" << std::setw(12) << "Salary" << '\n';
     report << "------------------------------------------\n";
 
     employee e;
@@ -66,13 +66,13 @@ int main(int argc, char* argv[]) {
         report << std::setw(8) << e.num
             << std::setw(12) << e.name
             << std::setw(10) << std::fixed << std::setprecision(2) << e.hours
-            << std::setw(12) << std::fixed << std::setprecision(2) << salary << "\n";
+            << std::setw(12) << std::fixed << std::setprecision(2) << salary << '\n';
     }
 
     report << "==========================================\n";
-    report << "Total employees: " << std::setw(3) << totalEmployees << "\n";
-    report << "Total salary: $" << std::fixed << std::setprecision(4) << totalSalary << "\n";
-    report << "Hourly rate: $" << std::fixed << std::setprecision(4) << hourlyPayment << "\n";
+    report << "Total employees: " << std::setw(3) << totalEmployees << '\n';
+    report << "Total salary: $" << std::fixed << std::setprecision(2) << totalSalary << '\n';
+    report << "Hourly rate: $" << std::fixed << std::setprecision(2) << hourlyPayment << '\n';
 
     std::string reportContent = report.str();
 
@@ -88,6 +88,6 @@ int main(int argc, char* argv[]) {
     CloseHandle(hInputFile);
     CloseHandle(hOutputFile);
 
-    std::cout << "Report created successfully: " << outputFilename << std::endl;
+    std::cout << "Report created successfully: " << outputFilename << '\n';
     return 0;
 }

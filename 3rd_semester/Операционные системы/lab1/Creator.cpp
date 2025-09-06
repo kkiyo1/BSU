@@ -5,7 +5,7 @@
 
 int main(int argc, char* argv[]) {
     if (argc != 3) {
-        std::cerr << "Usage: Creator <binary_file> <record_count>" << std::endl;
+        std::cerr << "Program usage: Creator <binary_file> <record_count>\n";
         std::cerr << "Press Enter to exit...";
         std::cin.get();
         return 1;
@@ -24,8 +24,8 @@ int main(int argc, char* argv[]) {
         NULL
     );
 
-    if (hOutputFile == INVALID_HANDLE_VALUE) {
-        std::cerr << "Error creating file: " << GetLastError() << std::endl;
+    if (INVALID_HANDLE_VALUE == hOutputFile) {
+        std::cerr << "Error creating file: " << GetLastError() << '\n';
         std::cerr << "Press Enter to exit...";
         std::cin.get();
         return 1;
@@ -33,13 +33,11 @@ int main(int argc, char* argv[]) {
 
     for (DWORD i = 0; i < recordsNumber; i++) {
         employee e;
-        std::cout << "Employee " << i + 1 << ":\n";
-        std::cout << "  number: ";
-        std::cin >> e.num;
-        std::cout << "  name: ";
-        std::cin >> e.name;
-        std::cout << "  hours: ";
-        std::cin >> e.hours;
+        if (!inputEmployeeData(e, i + 1)) {
+            std::cerr << "Error inputting employee data!\n";
+            CloseHandle(hOutputFile);
+            return 1;
+        }
 
         DWORD bytesWritten;
         WriteFile(
@@ -51,7 +49,7 @@ int main(int argc, char* argv[]) {
         );
 
         if (bytesWritten != sizeof(employee)) {
-            std::cerr << "Error writing to file" << std::endl;
+            std::cerr << "Error writing to file\n";
             CloseHandle(hOutputFile);
             std::cerr << "Press Enter to exit...";
             std::cin.get();
@@ -60,9 +58,6 @@ int main(int argc, char* argv[]) {
     }
 
     CloseHandle(hOutputFile);
-    std::cout << "File created successfully: " << outputFilename << std::endl;
-    std::cout << "Press Enter to exit...";
-    std::cin.ignore();
-    std::cin.get();
+    std::cout << "File created successfully: " << outputFilename << '\n';
     return 0;
 }

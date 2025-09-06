@@ -2,9 +2,10 @@ Report for file: data.bin
 ==========================================
   Number        Name     Hours      Salary
 ------------------------------------------
-    1235        hleb     18.00      126.00
-    1237        vlad     33.00      231.00
+    2134       sanya   14.0000     62.3000
+    1253       Petya   20.0000     89.0000
+    3148       Vasya   31.0000    137.9500
 ==========================================
-Total employees:   2
-Total salary: $357.00
-Hourly rate: $7.00
+Total employees:   3
+Total salary: $289.2500
+Hourly rate: $4.4500

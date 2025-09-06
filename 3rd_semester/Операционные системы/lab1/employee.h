@@ -8,3 +8,5 @@ struct employee {
 
 void printBinaryFile(const char* filename);
 void printTextFile(const char* filename);
+bool isNumber(const char* str);
+bool inputEmployeeData(employee& emp, int employeeNumber);
