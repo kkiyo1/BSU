@@ -1,3 +1,4 @@
+#include "C:\Users\user\Desktop\osLabs\lab3_test\lab3_test\pch.h"
 #include <iostream>
 #include <Windows.h>
 #include "header.h"
