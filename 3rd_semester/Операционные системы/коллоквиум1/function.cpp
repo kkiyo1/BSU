@@ -6,7 +6,41 @@ int factorial(int n) {
     return n * factorial(n - 1);
 }
 
-Array::Array(int size) : n(size), arr(new int[size]()) {}
+bool isValidSize(int& size) {
+    std::cin >> size;
+
+    if (std::cin.fail()) {
+        std::cin.clear();
+        std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+        std::cout << "Пожалуйста, введите целое число." << '\n';
+        size = -1;
+        return 0;
+    }
+    else if (size <= 0) {
+        std::cout << "Размер должен быть положительным числом!" << '\n';
+        return 0;
+    }
+
+    return 1;
+}
+
+bool isValidListElement(int& element, int index) {
+    std::cin >> element;
+
+    if (std::cin.fail()) {
+        std::cin.clear();
+        std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+        std::cout << "Ошибка! Пожалуйста, введите целое число для элемента " << (index + 1) << '\n';
+        return false;
+    }
+
+    return true;
+}
+
+
+//=======================================Array======================================================
+
+Array::Array(int size) : n(size), arr(new int[size]) {}
 
 Array::Array(const Array& other) : n(other.n), arr(new int[other.n]) {
     for (int i = 0; i < n; i++) {
@@ -22,8 +56,6 @@ Array::Array(Array&& other) noexcept : n(other.n), arr(other.arr) {
 Array::~Array() {
     delete[] arr;
 }
-
-int Array::getSize() { return n; }
 
 int& Array::operator[](int index) {
     if (index < 0 || index >= n) {
@@ -60,6 +92,44 @@ Array& Array::operator=(Array&& other) noexcept {
         other.n = 0;
     }
     return *this;
+}
+
+void Array::input() {
+    for (int i = 0; i < n; i++) {
+        int num;
+
+        do {
+            std::cout << "Введите " << i + 1 << " элемент массива: ";
+        } while (!isValidListElement(num, i));
+
+        arr[i] = num;
+    }
+}
+
+void Array::print() const {
+    if (n == 0) {
+        std::cout << "Массив пуст" << std::endl;
+        return;
+    }
+
+    for (int i = 0; i < n; i++) {
+        std::cout << arr[i];
+        if (i < n - 1) std::cout << " ";
+    }
+    std::cout << std::endl;
+}
+
+void Array::reverse() {
+    Array result(n);
+    auto reverseRecursive = [&](int start, int end, auto&& self) -> void {
+        if (start >= end) return;
+        result.arr[start] = this->arr[end - 1];
+        result.arr[end - 1] = this->arr[start];
+        self(start + 1, end - 1, self);
+        };
+
+    reverseRecursive(0, n, reverseRecursive);
+    *this = result;
 }
 
 Array Array::factorials(int count) {
@@ -100,20 +170,7 @@ Array Array::noDuplicates() {
     return result;
 }
 
-void Array::print() {
-    if (n == 0) {
-        std::cout << "Массив пуст" << std::endl;
-        return;
-    }
-
-    for (int i = 0; i < n; i++) {
-        std::cout << arr[i];
-        if (i < n - 1) std::cout << " ";
-    }
-    std::cout << std::endl;
-}
-
-Node::Node(int value) : data(value), next(nullptr) {}
+//=======================================LinkedList==============================================
 
 LinkedList::LinkedList() : head(nullptr), size(0) {}
 
@@ -128,23 +185,33 @@ LinkedList::~LinkedList() {
     size = 0;
 }
 
-void LinkedList::push(int a) {
-    Node* newNode = new Node(a);
+void LinkedList::input() {
+    int listSize = -1;
+    do {
+        std::cout << "Введите размер списка: ";
+    } while (!isValidSize(listSize));
 
-    if (head == nullptr) {
-        head = newNode;
+    Node* current = head;
+    while (current != nullptr) {
+        Node* next = current->next;
+        delete current;
+        current = next;
     }
-    else {
-        Node* current = head;
-        while (current->next != nullptr) {
-            current = current->next;
-        }
-        current->next = newNode;
+    head = nullptr;
+    size = 0;
+
+    for (int i = 0; i < listSize; i++) {
+        int num;
+
+        do {
+            std::cout << "Введите" << i + 1 << "элемент списка: ";
+        } while (!isValidListElement(num, i));
+
+        push(num);
     }
-    size++;
 }
 
-void LinkedList::print() {
+void LinkedList::print() const {
     if (head == nullptr) {
         std::cout << "Список пуст" << std::endl;
         return;
@@ -175,35 +242,27 @@ void LinkedList::reverse() {
     head = reverseRecursive(head, nullptr, reverseRecursive);
 }
 
-Menu::Menu() : currentArr(nullptr) {}
+void LinkedList::push(int a) {
+    Node* newNode = new Node(a);
+
+    if (head == nullptr) {
+        head = newNode;
+    }
+    else {
+        Node* current = head;
+        while (current->next != nullptr) {
+            current = current->next;
+        }
+        current->next = newNode;
+    }
+    size++;
+}
+
+//=============================================Menu=================================================
+Menu::Menu() : currentContainer(nullptr), currentArr(nullptr) {}
 
 Menu::~Menu() {
     delete currentArr;
-}
-
-void Menu::inputArray() {
-    int size;
-    std::cout << "Введите размер массива: ";
-    std::cin >> size;
-    delete currentArr;
-    currentArr = new Array(size);
-
-    std::cout << "Введите " << size << " элементов массива: ";
-    for (int i = 0; i < size; i++) {
-        std::cin >> (*currentArr)[i];
-    }
-}
-
-void Menu::inputList() {
-    int size;
-    std::cout << "Введите размер списка: ";
-    std::cin >> size;
-    std::cout << "Введите " << size << " элементов списка: ";
-    for (int i = 0; i < size; i++) {
-        int num;
-        std::cin >> num;
-        currentList.push(num);
-    }
 }
 
 void Menu::show() {
@@ -222,7 +281,18 @@ void Menu::show() {
         case '1': {
             int n;
             std::cout << "Введите n: ";
-            std::cin >> n;
+            do {
+                if (!isValidSize(n)) {
+                    continue;
+                }
+                else if (n > 12) {
+                    std::cout << "Число не должно превышать 12 (факториал большего числа не поместится в int): ";
+                }
+                else {
+                    break;
+                }
+            } while (true);
+
             delete currentArr;
             currentArr = new Array(n);
             currentArr->factorials(n);
@@ -231,7 +301,13 @@ void Menu::show() {
             break;
         }
         case '2': {
-            inputArray();
+            int arrSize = -1;
+            do {
+                std::cout << "Введите размер массива: ";
+            } while (!isValidSize(arrSize));
+            delete currentArr;
+            currentArr = new Array(arrSize);
+            currentArr->input();
             std::cout << "Исходный массив: ";
             currentArr->print();
             Array noDup = currentArr->noDuplicates();
@@ -240,7 +316,7 @@ void Menu::show() {
             break;
         }
         case '3': {
-            inputList();
+            currentList.input();
             std::cout << "Исходный список: ";
             currentList.print();
             currentList.reverse();
