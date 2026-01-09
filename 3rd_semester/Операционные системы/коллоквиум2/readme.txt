@@ -1,0 +1,1 @@
+made by deepseek in 30 mins
