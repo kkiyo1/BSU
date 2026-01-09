@@ -1,25 +1,20 @@
 from django.db import models
-from django.core.exceptions import ValidationError
 
 class Task(models.Model):
-    """Модель задачи"""
-    
     class StatusChoices(models.TextChoices):
-        TODO = 'todo', 'To Do'
-        IN_PROGRESS = 'in_progress', 'In Progress'
-        DONE = 'done', 'Done'
+        TODO = 'todo', 'К выполнению'
+        IN_PROGRESS = 'in_progress', 'В процессе'
+        DONE = 'done', 'Выполнено'
     
     title = models.CharField(
         max_length=200,
-        verbose_name='Название задачи',
-        help_text='Введите название задачи'
+        verbose_name='Название задачи'
     )
     
     description = models.TextField(
         verbose_name='Описание задачи',
         blank=True,
-        null=True,
-        help_text='Подробное описание задачи'
+        null=True
     )
     
     status = models.CharField(
@@ -39,23 +34,5 @@ class Task(models.Model):
         verbose_name='Дата обновления'
     )
     
-    class Meta:
-        verbose_name = 'Задача'
-        verbose_name_plural = 'Задачи'
-        ordering = ['-created_at']
-    
     def __str__(self):
         return f"{self.id}: {self.title} ({self.get_status_display()})"
-    
-    def clean(self):
-        """Валидация модели"""
-        if not self.title.strip():
-            raise ValidationError("Название задачи не может быть пустым")
-        
-        if self.status not in dict(self.StatusChoices.choices):
-            raise ValidationError(f"Недопустимый статус. Доступные: {', '.join(self.StatusChoices.values)}")
-    
-    def save(self, *args, **kwargs):
-        """Переопределение save с валидацией"""
-        self.full_clean()
-        super().save(*args, **kwargs)

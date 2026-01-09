@@ -1,158 +1,111 @@
 from rest_framework import views, status
 from rest_framework.response import Response
-from rest_framework.exceptions import NotFound
-from django.db import transaction
 from .models import Task
-from .serializers import TaskSerializer, TaskListSerializer
+from .serializers import TaskSerializer
 
-class BaseAPIView:
-    """Базовый класс для API представлений"""
+class TaskListView(views.APIView):
+    def get(self, request):
+        """Получить список всех задач"""
+        tasks = Task.objects.all()
+        serializer = TaskSerializer(tasks, many=True)
+        return Response({
+            "success": True,
+            "data": serializer.data,
+            "count": tasks.count()
+        })
     
-    @staticmethod
-    def get_task(pk):
-        """Получение задачи по ID"""
+    def post(self, request):
+        """Создать новую задачу"""
+        serializer = TaskSerializer(data=request.data)
+        if serializer.is_valid():
+            task = serializer.save()
+            return Response({
+                "success": True,
+                "data": TaskSerializer(task).data,
+                "message": "Задача успешно создана"
+            }, status=status.HTTP_201_CREATED)
+        return Response({
+            "success": False,
+            "errors": serializer.errors
+        }, status=status.HTTP_400_BAD_REQUEST)
+
+class TaskDetailView(views.APIView):
+    def get_object(self, pk):
         try:
             return Task.objects.get(pk=pk)
         except Task.DoesNotExist:
-            raise NotFound(detail=f"Задача с ID {pk} не найдена")
-
-class TaskListView(BaseAPIView, views.APIView):
-    """API представление для работы со списком задач"""
-    
-    def get(self, request):
-        """Получение списка всех задач"""
-        try:
-            tasks = Task.objects.all()
-            serializer = TaskListSerializer(tasks, many=True)
-            return Response({
-                "success": True,
-                "data": serializer.data,
-                "count": tasks.count()
-            }, status=status.HTTP_200_OK)
-        except Exception as e:
-            return Response({
-                "success": False,
-                "error": str(e)
-            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-    
-    @transaction.atomic
-    def post(self, request):
-        """Создание новой задачи"""
-        try:
-            serializer = TaskSerializer(data=request.data)
-            if serializer.is_valid():
-                task = serializer.save()
-                return Response({
-                    "success": True,
-                    "data": TaskSerializer(task).data,
-                    "message": "Задача успешно создана"
-                }, status=status.HTTP_201_CREATED)
-            return Response({
-                "success": False,
-                "errors": serializer.errors
-            }, status=status.HTTP_400_BAD_REQUEST)
-        except Exception as e:
-            return Response({
-                "success": False,
-                "error": str(e)
-            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-
-class TaskDetailView(BaseAPIView, views.APIView):
-    """API представление для работы с конкретной задачей"""
+            return None
     
     def get(self, request, pk):
-        """Получение задачи по ID"""
-        try:
-            task = self.get_task(pk)
-            serializer = TaskSerializer(task)
-            return Response({
-                "success": True,
-                "data": serializer.data
-            }, status=status.HTTP_200_OK)
-        except NotFound as e:
+        """Получить задачу по ID"""
+        task = self.get_object(pk)
+        if task is None:
             return Response({
                 "success": False,
-                "error": str(e.detail)
+                "error": f"Задача с ID {pk} не найдена"
             }, status=status.HTTP_404_NOT_FOUND)
-        except Exception as e:
-            return Response({
-                "success": False,
-                "error": str(e)
-            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+        
+        serializer = TaskSerializer(task)
+        return Response({
+            "success": True,
+            "data": serializer.data
+        })
     
-    @transaction.atomic
     def put(self, request, pk):
-        """Полное обновление задачи"""
-        try:
-            task = self.get_task(pk)
-            serializer = TaskSerializer(task, data=request.data)
-            if serializer.is_valid():
-                updated_task = serializer.save()
-                return Response({
-                    "success": True,
-                    "data": TaskSerializer(updated_task).data,
-                    "message": "Задача успешно обновлена"
-                }, status=status.HTTP_200_OK)
+        """Полностью обновить задачу"""
+        task = self.get_object(pk)
+        if task is None:
             return Response({
                 "success": False,
-                "errors": serializer.errors
-            }, status=status.HTTP_400_BAD_REQUEST)
-        except NotFound as e:
-            return Response({
-                "success": False,
-                "error": str(e.detail)
+                "error": f"Задача с ID {pk} не найдена"
             }, status=status.HTTP_404_NOT_FOUND)
-        except Exception as e:
-            return Response({
-                "success": False,
-                "error": str(e)
-            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-    
-    @transaction.atomic
-    def patch(self, request, pk):
-        """Частичное обновление задачи"""
-        try:
-            task = self.get_task(pk)
-            serializer = TaskSerializer(task, data=request.data, partial=True)
-            if serializer.is_valid():
-                updated_task = serializer.save()
-                return Response({
-                    "success": True,
-                    "data": TaskSerializer(updated_task).data,
-                    "message": "Задача успешно обновлена"
-                }, status=status.HTTP_200_OK)
-            return Response({
-                "success": False,
-                "errors": serializer.errors
-            }, status=status.HTTP_400_BAD_REQUEST)
-        except NotFound as e:
-            return Response({
-                "success": False,
-                "error": str(e.detail)
-            }, status=status.HTTP_404_NOT_FOUND)
-        except Exception as e:
-            return Response({
-                "success": False,
-                "error": str(e)
-            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-    
-    @transaction.atomic
-    def delete(self, request, pk):
-        """Удаление задачи"""
-        try:
-            task = self.get_task(pk)
-            task.delete()
+        
+        serializer = TaskSerializer(task, data=request.data)
+        if serializer.is_valid():
+            updated_task = serializer.save()
             return Response({
                 "success": True,
-                "message": f"Задача с ID {pk} успешно удалена"
-            }, status=status.HTTP_200_OK)
-        except NotFound as e:
+                "data": TaskSerializer(updated_task).data,
+                "message": "Задача успешно обновлена"
+            })
+        return Response({
+            "success": False,
+            "errors": serializer.errors
+        }, status=status.HTTP_400_BAD_REQUEST)
+    
+    def patch(self, request, pk):
+        """Частично обновить задачу"""
+        task = self.get_object(pk)
+        if task is None:
             return Response({
                 "success": False,
-                "error": str(e.detail)
+                "error": f"Задача с ID {pk} не найдена"
             }, status=status.HTTP_404_NOT_FOUND)
-        except Exception as e:
+        
+        serializer = TaskSerializer(task, data=request.data, partial=True)
+        if serializer.is_valid():
+            updated_task = serializer.save()
+            return Response({
+                "success": True,
+                "data": TaskSerializer(updated_task).data,
+                "message": "Задача успешно обновлена"
+            })
+        return Response({
+            "success": False,
+            "errors": serializer.errors
+        }, status=status.HTTP_400_BAD_REQUEST)
+    
+    def delete(self, request, pk):
+        """Удалить задачу"""
+        task = self.get_object(pk)
+        if task is None:
             return Response({
                 "success": False,
-                "error": str(e)
-            }, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+                "error": f"Задача с ID {pk} не найдена"
+            }, status=status.HTTP_404_NOT_FOUND)
+        
+        task.delete()
+        return Response({
+            "success": True,
+            "message": f"Задача с ID {pk} успешно удалена"
+        })
