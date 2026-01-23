@@ -1,0 +1,25 @@
+Tasks
+Title: Prepare quarterly report
+Deadline: 2026-01-30
+Description: Financial report for Q4 2023
+Priority: HIGH
+
+Title: Team meeting
+Deadline: 2026-02-06
+Description: Weekly status update
+Priority: MEDIUM
+
+Title: Update documentation
+Deadline: 2026-01-26
+Description: Update API documentation
+Priority: LOW
+
+Title: Call client
+Deadline: 2026-02-02
+Description: Discuss project requirements
+Priority: MEDIUM
+
+Title: Fix critical bug
+Deadline: 2026-01-21
+Description: Urgent bug fix in production
+Priority: HIGH
